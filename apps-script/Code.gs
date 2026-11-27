@@ -9,7 +9,7 @@ const HEADERS = [
   '접수번호', '편지 유형', '수신 동의 링크 해시', '동의 기록'
 ];
 
-function setupProject_() {
+function setupProject() {
   const properties = PropertiesService.getScriptProperties();
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   if (!spreadsheet) throw new Error('편지함에서 연결된 프로젝트를 열어주세요.');
