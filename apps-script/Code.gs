@@ -263,3 +263,7 @@ function acceptInvitation(payload) {
     return { status: '발송 대기' };
   });
 }
+
+function getServiceState() {
+  return { accepting: PropertiesService.getScriptProperties().getProperty('ACCEPTING') === 'true' };
+}
