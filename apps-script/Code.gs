@@ -2,7 +2,7 @@
  * Bonus Track server. Deploy as owner after configuring the linked private sheet.
  * Public functions validate all input. Functions ending "_" are editor-only helpers.
  */
-const POLICY_VERSION = '2026-11-27';
+const POLICY_VERSION = '2026-11-27-direct-v1';
 const HEADERS = [
   '접수일', '보내는 사람', '작성자 이메일', '받는 사람', '받을 이메일',
   '편지', '발송 예정일', '발송 상태', '실제 발송일',
@@ -26,8 +26,6 @@ function setupProject() {
   }
   sheet.getRange(1, 10, 1, 4).setValues([HEADERS.slice(9)]);
   sheet.setFrozenRows(1);
-  // Requests only email-send permission, never inbox-reading permission.
-  MailApp.getRemainingDailyQuota();
   return '저장 연결 준비 완료. ACCEPTING=false 상태입니다.';
 }
 
@@ -72,17 +70,6 @@ function id_(value) {
   return value;
 }
 
-function hash_(value) {
-  return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, value)
-    .map(byte => ('0' + ((byte + 256) % 256).toString(16)).slice(-2)).join('');
-}
-
-function invitation_(id) {
-  const secret = PropertiesService.getScriptProperties().getProperty('TOKEN_SECRET');
-  return Utilities.computeHmacSha256Signature(id, secret)
-    .map(byte => ('0' + ((byte + 256) % 256).toString(16)).slice(-2)).join('');
-}
-
 function locked_(callback) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
@@ -98,15 +85,6 @@ function findRow_(sheet, column, value) {
   const cell = sheet.getRange(2, column, sheet.getLastRow() - 1, 1)
     .createTextFinder(value).matchEntireCell(true).useRegularExpression(false).findNext();
   return cell ? cell.getRow() : 0;
-}
-
-function invitationRow_(sheet, token) {
-  if (typeof token !== 'string' || !/^[a-f0-9]{64}$/.test(token)) {
-    throw new Error('동의 요청 링크를 확인해주세요.');
-  }
-  const row = findRow_(sheet, 12, hash_(token));
-  if (!row) throw new Error('유효한 동의 요청을 찾을 수 없습니다.');
-  return row;
 }
 
 function timestamp_() {
@@ -125,63 +103,6 @@ function requireConsent_(payload) {
   }
 }
 
-function verificationKey_(payload) {
-  const purpose = payload.purpose === 'recipient' ? 'recipient' : 'sender';
-  const resource = purpose === 'recipient' ? text_(payload.token, 64, '링크') : id_(payload.id);
-  return 'verify:' + hash_(purpose + '|' + resource + '|' + email_(payload.email));
-}
-
-function requestEmailCode(payload) {
-  assertOpen_();
-  requireConsent_(payload);
-  return locked_(() => {
-    if (payload.purpose === 'recipient') {
-      const sheet = sheet_();
-      const row = invitationRow_(sheet, payload.token);
-      if (sheet.getRange(row, 8).getDisplayValue() !== '수신 동의 대기') {
-        throw new Error('이미 처리된 동의 요청입니다.');
-      }
-    }
-    const cache = CacheService.getScriptCache();
-    const key = verificationKey_(payload);
-    if (cache.get(key + ':cooldown')) throw new Error('1분 후 다시 요청해주세요.');
-    const countKey = 'daily:' + Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyyMMdd');
-    const count = Number(cache.get(countKey) || 0);
-    if (count >= 80 || MailApp.getRemainingDailyQuota() < 1) {
-      throw new Error('오늘의 이메일 확인 요청이 많습니다. 문의 이메일로 연락해주세요.');
-    }
-    const code = String(parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 10), 16) % 1000000)
-      .padStart(6, '0');
-    cache.put(key, JSON.stringify({ digest: hash_(code), attempts: 0 }), 600);
-    cache.put(key + ':cooldown', '1', 60);
-    cache.put(countKey, String(count + 1), 86400);
-    MailApp.sendEmail({
-      to: email_(payload.email),
-      subject: '[말랑한 마음] 보너스트랙 이메일 확인',
-      body: '요청하신 이메일 확인 번호는 ' + code +
-        '입니다. 10분 안에 입력해주세요.\n\n본인이 요청하지 않았다면 무시하셔도 됩니다.\n문의: mellowmind.official@gmail.com',
-      name: '말랑한 마음',
-      replyTo: 'mellowmind.official@gmail.com'
-    });
-    return { expiresIn: 600 };
-  });
-}
-
-function verifyCode_(payload) {
-  const key = verificationKey_(payload);
-  const cache = CacheService.getScriptCache();
-  const raw = cache.get(key);
-  if (!raw) throw new Error('이메일 확인 번호를 다시 요청해주세요.');
-  const challenge = JSON.parse(raw);
-  if (challenge.attempts >= 5) throw new Error('확인 횟수를 초과했습니다. 번호를 다시 요청해주세요.');
-  challenge.attempts += 1;
-  cache.put(key, JSON.stringify(challenge), 600);
-  if (hash_(String(payload.code || '')) !== challenge.digest) {
-    throw new Error('이메일 확인 번호가 맞지 않습니다.');
-  }
-  return key;
-}
-
 function submitLetter(payload) {
   assertOpen_();
   requireConsent_(payload);
@@ -192,75 +113,36 @@ function submitLetter(payload) {
   const other = payload.audience === 'other';
   if (!other && payload.audience !== 'self') throw new Error('받는 대상을 선택해주세요.');
   if (other && payload.sharing !== true) throw new Error('받는 분에게 전달되는 정보에 동의해주세요.');
+  const recipient = other ? text_(payload.recipient, 50, '받는 사람') : sender;
+  const recipientEmail = other ? email_(payload.recipientEmail) : email;
   return locked_(() => {
     const sheet = sheet_();
     const existing = findRow_(sheet, 10, id);
-    const token = other ? invitation_(id) : '';
-    const receipt = { id: id, invitationToken: token, status: other ? '수신 동의 대기' : '발송 대기' };
+    const receipt = { id: id, status: '발송 대기' };
     if (existing) {
       const row = sheet.getRange(existing, 1, 1, 13).getValues()[0];
-      if (row[2] !== email || row[1] !== sender || row[5] !== letter || row[10] !== payload.audience) {
+      if (row[2] !== email || row[1] !== sender || row[5] !== letter || row[10] !== payload.audience || row[3] !== recipient || row[4] !== recipientEmail) {
         throw new Error('이미 접수된 편지입니다. 수정은 문의 이메일로 요청해주세요.');
       }
+      receipt.status = row[7];
       return receipt;
     }
-    const key = verifyCode_(Object.assign({}, payload, { purpose: 'sender' }));
     const now = timestamp_();
     const metadata = {
       version: POLICY_VERSION,
-      sender: { privacy: true, delivery: true, sharing: other, at: now, emailVerifiedAt: now },
-      recipient: other ? null : { privacy: true, delivery: true, at: now, emailVerifiedAt: now }
+      sender: { privacy: true, delivery: true, sharing: other, at: now, emailVerified: false },
+      recipient: other ? null : { privacy: true, delivery: true, at: now, emailVerified: false },
+      recipientProvidedBy: 'sender',
+      recipientConsentCollected: !other
     };
     const values = [
-      now, sender, email, other ? '' : sender, other ? '' : email,
+      now, sender, email, recipient, recipientEmail,
       letter, '2027-12', receipt.status, '', id, payload.audience,
-      other ? hash_(token) : '', JSON.stringify(metadata)
+      '', JSON.stringify(metadata)
     ].map(safeCell_);
     sheet.getRange(sheet.getLastRow() + 1, 1, 1, values.length).setValues([values]);
     SpreadsheetApp.flush();
-    CacheService.getScriptCache().remove(key);
     return receipt;
-  });
-}
-
-function getInvitation(token) {
-  assertOpen_();
-  const sheet = sheet_();
-  const row = invitationRow_(sheet, token);
-  if (sheet.getRange(row, 8).getDisplayValue() !== '수신 동의 대기') {
-    throw new Error('이미 처리된 동의 요청입니다.');
-  }
-  return { sender: sheet.getRange(row, 2).getDisplayValue(), policyVersion: POLICY_VERSION };
-}
-
-function acceptInvitation(payload) {
-  assertOpen_();
-  requireConsent_(payload);
-  const name = text_(payload.name, 50, '받는 사람');
-  const email = email_(payload.email);
-  return locked_(() => {
-    const sheet = sheet_();
-    const row = invitationRow_(sheet, payload.token);
-    const status = sheet.getRange(row, 8).getDisplayValue();
-    if (status !== '수신 동의 대기') {
-      if (status === '발송 대기' && sheet.getRange(row, 5).getDisplayValue() === email) {
-        return { status: '발송 대기' };
-      }
-      throw new Error('이미 처리된 동의 요청입니다.');
-    }
-    const key = verifyCode_(Object.assign({}, payload, { purpose: 'recipient' }));
-    const metadata = JSON.parse(sheet.getRange(row, 13).getDisplayValue());
-    const now = timestamp_();
-    metadata.recipient = { privacy: true, delivery: true, at: now, emailVerifiedAt: now, version: POLICY_VERSION };
-    const values = sheet.getRange(row, 1, 1, 13).getValues()[0];
-    values[3] = name;
-    values[4] = email;
-    values[7] = '발송 대기';
-    values[12] = JSON.stringify(metadata);
-    sheet.getRange(row, 1, 1, 13).setValues([values.map(value => safeCell_(String(value)))]);
-    SpreadsheetApp.flush();
-    CacheService.getScriptCache().remove(key);
-    return { status: '발송 대기' };
   });
 }
 
