@@ -104,12 +104,10 @@ details summary { cursor: pointer; min-height: 44px; padding: 10px 0; }
 <label class="field" for="sender">보내는 사람</label><input id="sender" name="sender" maxlength="50" required autocomplete="off" placeholder="이름 또는 별명">
 <label class="field" for="email" id="email-label">편지를 받을 내 이메일</label><input id="email" name="email" type="email" maxlength="254" required autocomplete="off" inputmode="email" placeholder="example@email.com">
 <div id="recipient-fields" hidden>
-  <div class="consent-box">
-    <h2>받는 분에게 동의를 요청해요</h2>
-    <p>편지를 작성한 뒤 동의 요청 링크를 받는 분에게 직접 전달해주세요. 받는 분이 자신의 이름과 이메일을 입력하고 동의하면, 말랑한 마음이 2027년 12월에 편지를 보내드려요.</p>
-    <p>동의 요청 화면에는 보내는 분의 이름과 발송 안내가 보여요. 편지 내용은 발송일까지 보관해요.</p>
-    
-  </div>
+  <label class="field" for="recipient">받는 사람</label>
+  <input id="recipient" name="recipient" maxlength="50" autocomplete="off" placeholder="이름 또는 별명" disabled>
+  <label class="field" for="recipient-email">받는 사람의 이메일</label>
+  <input id="recipient-email" name="recipientEmail" type="email" maxlength="254" autocomplete="off" inputmode="email" placeholder="example@email.com" disabled>
 </div>
 <label class="field" for="letter">전하고 싶은 이야기</label><textarea id="letter" name="letter" maxlength="5000" required placeholder="지금의 나는…"></textarea><p class="count"><span id="count">0</span> / 5,000</p>
 
@@ -121,7 +119,7 @@ details summary { cursor: pointer; min-height: 44px; padding: 10px 0; }
     <dl>
       <dt>수집·이용하는 곳</dt><dd>말랑한 마음</dd>
       <dt>이용 목적</dt><dd>편지 접수·보관, 발송 관리, 2027년 12월 이메일 발송, 전달 오류 및 문의 대응</dd>
-      <dt>수집 항목</dt><dd>작성자의 이름 또는 별명, 이메일, 편지 내용, 접수일, 발송 및 동의 기록. 다른 사람에게 보내는 경우 받는 분의 이름과 이메일은 받는 분이 직접 입력하고 동의합니다.</dd>
+      <dt>수집 항목</dt><dd>작성자의 이름 또는 별명, 이메일, 편지 내용, 접수일, 발송 및 동의 기록. 다른 사람에게 보내는 경우 작성자가 받는 분의 이름 또는 별명과 이메일을 함께 입력합니다.</dd>
       <dt>보유 및 이용 기간</dt><dd>2027년 12월 발송 및 전달 오류 대응을 위해 2028년 1월 31일까지 보관 후 삭제합니다.</dd>
       <dt>동의 거부와 철회</dt><dd>동의를 거부할 수 있으며, 거부하면 편지 접수가 어렵습니다. 동의 철회와 열람·수정·삭제 요청은 mellowmind.official@gmail.com으로 보내주세요.</dd>
     </dl>
@@ -131,8 +129,8 @@ details summary { cursor: pointer; min-height: 44px; padding: 10px 0; }
   <div id="sharing-consent-section" hidden>
     <details>
       <summary>받는 분에게 전달되는 정보 보기</summary>
-      <p>제공받는 사람은 동의 요청 링크에서 수신에 동의한 받는 분입니다. 동의 요청 시 작성자의 이름 또는 별명을, 2027년 12월 편지 발송 시 작성자의 이름 또는 별명과 편지 내용을 전달합니다.</p>
-      <p>이용 목적은 편지 수신 동의 여부 결정과 편지 수신·열람입니다. 받는 분은 이메일을 받은 후 직접 보관·삭제하며, 그 보관 기간은 받는 분의 의사에 따릅니다.</p>
+      <p>제공받는 사람은 작성자가 지정한 받는 분입니다. 2027년 12월 편지 발송 시 작성자의 이름 또는 별명과 편지 내용을 전달합니다.</p>
+      <p>이용 목적은 편지 수신·열람입니다. 받는 분은 이메일을 받은 후 직접 보관·삭제하며, 그 보관 기간은 받는 분의 의사에 따릅니다.</p>
       <p>전달에 동의하지 않을 수 있으며, 이 경우 다른 사람에게 편지를 보내는 서비스 이용이 어렵습니다.</p>
     </details>
     <label class="consent-check"><input id="sharing-consent" type="checkbox" disabled><span>[필수] 위 안내에 따라 내 이름 또는 별명과 편지 내용을 받는 분에게 전달하는 데 동의합니다.</span></label>
@@ -140,20 +138,14 @@ details summary { cursor: pointer; min-height: 44px; padding: 10px 0; }
   <p class="hint">편지에는 주민등록번호, 계좌 비밀번호나 본인·다른 사람의 건강정보 등 민감한 개인정보를 적지 말아주세요.</p>
   <button type="button" class="text-link" data-open-privacy>개인정보 처리 안내 전체 보기</button>
 </div>
-<button class="primary" type="submit">쓴 편지 확인하기 →</button><p class="hint">미리보기 후 이메일을 확인하고 최종 접수할 수 있어요.</p>
+<button class="primary" type="submit">쓴 편지 확인하기 →</button><p class="hint">작성 내용을 확인한 뒤 편지를 접수할 수 있어요.</p>
 </form>
 <section class="review" id="review" hidden aria-labelledby="review-title"><h2 id="review-title" tabindex="-1">편지 미리보기</h2><p id="review-to"></p><p id="review-email"></p><div id="review-letter" class="letter"></div><p class="status" id="review-status" role="status">입력한 이메일과 편지 내용을 확인해주세요. 최종 접수 버튼을 누르면 저장됩니다.</p>
-<div id="sender-verification">
-<button type="button" class="secondary" id="send-code">내 이메일로 확인 번호 받기</button>
-<label class="field" for="sender-code">작성자 이메일 확인 번호</label>
-<input id="sender-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="6자리 번호">
+<div id="submit-section">
 <button type="button" class="primary" id="submit-letter">편지 접수하기</button>
 </div>
 <div id="receipt" hidden>
 <p id="receipt-status" class="status" role="status"></p>
-<label class="field" for="invite-link" id="invite-label" hidden>받는 분에게 전달할 동의 요청 링크</label>
-<input id="invite-link" type="url" readonly hidden>
-<p id="invite-help" class="hint" hidden>링크를 복사해서 받는 분에게 직접 전달해주세요. 이 링크에는 보내는 분의 이름이 표시돼요. 링크를 받은 분이 이메일을 확인하고 동의해야 발송 대상으로 등록됩니다.</p>
 </div><button type="button" class="secondary" id="edit">다시 수정하기</button></section>
 </main>
 </div>
@@ -163,41 +155,16 @@ details summary { cursor: pointer; min-height: 44px; padding: 10px 0; }
   <h2 id="privacy-title">개인정보 처리 안내</h2>
   <p>편지를 최종 접수하면 입력한 편지와 동의 기록이 말랑한 마음의 비공개 편지함에 저장됩니다.</p>
   <p>말랑한 마음은 이름 또는 별명, 이메일, 편지와 접수·동의·발송 기록을 편지 보관 및 이메일 발송, 관련 문의 대응에 사용합니다.</p>
-  <p>말랑한 마음의 담당 운영자가 발송을 위해 편지를 확인할 수 있습니다. 다른 사람에게 보내는 편지는 받는 분이 직접 정보를 입력하고 동의하는 절차를 거칩니다.</p>
+  <p>말랑한 마음의 담당 운영자가 발송을 위해 편지를 확인할 수 있습니다. 다른 사람에게 보내는 편지는 작성자가 지정한 받는 분의 이메일로 직접 발송합니다.</p>
   <p>보관 기간은 2028년 1월 31일까지이며, 이후 삭제합니다. 동의를 거부하면 편지 접수가 제한되며, 동의 철회·열람·수정·삭제 요청은 mellowmind.official@gmail.com으로 보내주세요.</p>
   <p>문의 이메일은 mellowmind.official@gmail.com입니다. 개인정보 담당자, 실제 저장 서비스의 위탁·국외 이전 안내, 아동 이용 절차는 운영 조건에 맞춰 확정한 뒤 실제 접수 화면에 적용합니다.</p>
   <form method="dialog"><button class="primary">닫기</button></form>
 </dialog>
-<dialog class="modal" id="recipient-dialog" aria-labelledby="recipient-title">
-  <h2 id="recipient-title">1년 뒤 편지를 받아보실래요?</h2>
-  <p id="invitation-from"></p>
-  <p>말랑한 마음이 2027년 12월에 편지를 이메일로 직접 보내드려요. 받는 분의 이메일 확인과 동의가 완료되면 발송 대상으로 등록됩니다.</p>
-  <form id="recipient-consent-form">
-    <label class="field" for="recipient">받는 사람</label>
-    <input id="recipient" name="recipient" maxlength="50" required autocomplete="off" placeholder="이름 또는 별명">
-    <label class="field" for="recipient-email">편지를 받을 내 이메일</label>
-    <input id="recipient-email" name="recipientEmail" type="email" maxlength="254" required autocomplete="off" inputmode="email" placeholder="example@email.com">
-    <div class="consent-box">
-      <h3>수신을 위한 개인정보 수집·이용</h3>
-      <p>말랑한 마음이 편지 수신 동의 확인, 2027년 12월 이메일 발송 및 전달 오류 대응을 위해 받는 분의 이름 또는 별명, 이메일, 동의·발송 기록을 수집·이용합니다.</p>
-      <p>보관 기한은 2028년 1월 31일까지이며 이후 삭제합니다. 동의를 거부할 수 있으며, 거부하면 편지가 발송되지 않습니다. 동의 철회·열람·수정·삭제 요청은 mellowmind.official@gmail.com으로 보내주세요.</p>
-      <label class="consent-check"><input id="recipient-privacy" type="checkbox" required><span>[필수] 개인정보 수집·이용에 동의합니다.</span></label>
-      <label class="consent-check"><input id="recipient-delivery" type="checkbox" required><span>[필수] 2027년 12월 말랑한 마음이 보내는 이 편지의 이메일 수신에 동의합니다.</span></label>
-    </div>
-    <button type="button" class="secondary" id="recipient-code-request">이메일로 확인 번호 받기</button>
-<label class="field" for="recipient-code">받는 분 이메일 확인 번호</label>
-<input id="recipient-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required placeholder="6자리 번호">
-<button class="primary">동의하고 수신 등록하기</button>
-    <p id="recipient-demo-result" class="status" role="status" hidden></p>
-  </form>
-  <form method="dialog"><button class="secondary">닫기</button></form>
-</dialog>
 <script>
 const $ = id => document.getElementById(id);
-const POLICY_VERSION = '2026-11-27';
+const POLICY_VERSION = '2026-11-27-direct-v1';
 const selfIntro = $('writing-intro').textContent;
 let requestId = crypto.randomUUID();
-let inviteToken = '';
 let serviceReady = false;
 let busy = false;
 
@@ -218,25 +185,12 @@ function senderPayload() {
     sender: $('sender').value,
     email: $('email').value,
     letter: $('letter').value,
-    code: $('sender-code').value,
-    purpose: 'sender',
+    recipient: $('recipient').value,
+    recipientEmail: $('recipient-email').value,
     policyVersion: POLICY_VERSION,
     privacy: $('privacy-consent').checked,
     delivery: $('delivery-consent').checked,
     sharing: $('sharing-consent').checked
-  };
-}
-
-function recipientPayload() {
-  return {
-    token: inviteToken,
-    purpose: 'recipient',
-    name: $('recipient').value,
-    email: $('recipient-email').value,
-    code: $('recipient-code').value,
-    policyVersion: POLICY_VERSION,
-    privacy: $('recipient-privacy').checked,
-    delivery: $('recipient-delivery').checked
   };
 }
 
@@ -282,6 +236,10 @@ function updateRecipient() {
   $('email-label').textContent = other ? '보내는 사람의 이메일' : '편지를 받을 내 이메일';
   $('letter').placeholder = other ? '1년 뒤의 너에게…' : '지금의 나는…';
   $('recipient-fields').hidden = !other;
+  for (const id of ['recipient', 'recipient-email']) {
+    $(id).disabled = !other;
+    $(id).required = other;
+  }
   $('sharing-consent-section').hidden = !other;
   $('sharing-consent').required = other;
   $('sharing-consent').disabled = !other;
@@ -298,10 +256,10 @@ document.querySelectorAll('[data-open-privacy]').forEach(button => {
 
 $('letter-form').addEventListener('submit', event => {
   event.preventDefault();
-  $('review-to').textContent = audienceIsOther() ? 'To. 소중한 사람' : 'To. ' + $('sender').value;
-  $('review-email').textContent = '확인할 이메일 · ' + $('email').value;
+  $('review-to').textContent = 'To. ' + (audienceIsOther() ? $('recipient').value : $('sender').value);
+  $('review-email').textContent = '받을 이메일 · ' + (audienceIsOther() ? $('recipient-email').value : $('email').value);
   $('review-letter').textContent = $('letter').value;
-  $('review-status').textContent = '이메일 주소와 편지 내용을 확인하고 이메일 확인을 진행해주세요.';
+  $('review-status').textContent = '이메일 주소에 오타가 없는지 확인한 뒤 접수해주세요.';
   $('letter-form').hidden = true;
   $('recipient-picker').hidden = true;
   $('review').hidden = false;
@@ -315,53 +273,18 @@ $('edit').addEventListener('click', () => {
   $('letter').focus();
 });
 
-$('send-code').addEventListener('click', () => perform($('send-code'), $('review-status'), async () => {
-  await callServer('requestEmailCode', senderPayload());
-  $('review-status').textContent = '이메일로 확인 번호를 보냈어요. 10분 안에 입력해주세요. 스팸함도 확인해주세요.';
-}));
-
 $('submit-letter').addEventListener('click', () => perform($('submit-letter'), $('review-status'), async () => {
-  if (!/^[0-9]{6}$/.test($('sender-code').value)) throw new Error('확인 번호 6자리를 입력해주세요.');
   const response = await callServer('submitLetter', senderPayload());
-  $('sender-verification').hidden = true;
+  $('submit-section').hidden = true;
   $('receipt').hidden = false;
   $('edit').hidden = true;
   $('review-status').textContent = '편지가 안전하게 저장됐어요.';
-  $('receipt-status').textContent = response.status === '수신 동의 대기'
-    ? '받는 분의 동의를 기다리고 있어요. 아래 링크를 전달해주세요.'
-    : '2027년 12월에 말랑한 마음이 이메일로 보내드릴게요.';
-  if (response.invitationToken) {
-    $('invite-link').value = 'https://mellowmind01.github.io/bonus-track/?invite=' + response.invitationToken;
-    for (const id of ['invite-link', 'invite-label', 'invite-help']) $(id).hidden = false;
-  }
+  $('receipt-status').textContent = '2027년 12월에 말랑한 마음이 입력한 받는 분의 이메일로 보내드릴게요.';
 }));
-
-$('recipient-code-request').addEventListener('click', () => perform(
-  $('recipient-code-request'), $('recipient-demo-result'), async () => {
-    if (!$('recipient').reportValidity() || !$('recipient-email').reportValidity() ||
-        !$('recipient-privacy').reportValidity() || !$('recipient-delivery').reportValidity()) {
-      $('recipient-demo-result').textContent = '이름, 이메일과 필수 동의를 확인해주세요.';
-      return;
-    }
-    await callServer('requestEmailCode', recipientPayload());
-    $('recipient-demo-result').textContent = '이메일로 확인 번호를 보냈어요. 10분 안에 입력해주세요.';
-  }
-));
-
-$('recipient-consent-form').addEventListener('submit', event => {
-  event.preventDefault();
-  const button = event.submitter;
-  perform(button, $('recipient-demo-result'), async () => {
-    await callServer('acceptInvitation', recipientPayload());
-    $('recipient-demo-result').textContent = '수신 동의와 이메일 확인이 완료됐어요. 2027년 12월에 말랑한 마음이 편지를 보내드릴게요.';
-    $('recipient-code-request').hidden = true;
-    button.hidden = true;
-  });
-});
 
 async function initialize(parameters) {
   try {
-    if (parameters.view === 'write' && !parameters.invite) {
+    if (parameters.view === 'write') {
       location.hash = '#write';
       route();
     }
@@ -369,12 +292,7 @@ async function initialize(parameters) {
     serviceReady = state.accepting;
     $('service-state').textContent = serviceReady ? '말랑한 마음 · 보너스트랙' : '접수 연결 준비 중 · 아직 편지는 접수되지 않아요';
     if (parameters.invite) {
-      inviteToken = parameters.invite;
-      const invitation = await callServer('getInvitation', inviteToken);
-      $('home').hidden = true;
-      $('write').hidden = true;
-      $('invitation-from').textContent = invitation.sender + ' 님이 당신에게 편지를 남기고 싶어 해요.';
-      $('recipient-dialog').showModal();
+      $('service-state').textContent = '접수 방식이 간단해졌어요. 기존 동의 요청 링크 문의는 mellowmind.official@gmail.com으로 보내주세요.';
     }
   } catch (error) {
     $('service-state').textContent = error.message || '편지함 연결을 확인해주세요.';
