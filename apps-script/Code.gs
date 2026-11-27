@@ -267,3 +267,13 @@ function acceptInvitation(payload) {
 function getServiceState() {
   return { accepting: PropertiesService.getScriptProperties().getProperty('ACCEPTING') === 'true' };
 }
+
+/** Run from the editor to open or pause receipts after deployment checks. */
+function openReceipts() {
+  if (!SpreadsheetApp.getActiveSpreadsheet()) throw new Error('편지함에 연결된 편집기에서 실행해주세요.');
+  PropertiesService.getScriptProperties().setProperty('ACCEPTING', 'true');
+}
+function pauseReceipts() {
+  if (!SpreadsheetApp.getActiveSpreadsheet()) throw new Error('편지함에 연결된 편집기에서 실행해주세요.');
+  PropertiesService.getScriptProperties().setProperty('ACCEPTING', 'false');
+}
