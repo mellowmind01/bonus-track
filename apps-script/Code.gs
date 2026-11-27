@@ -42,9 +42,6 @@ function assertOpen_() {
   if (PropertiesService.getScriptProperties().getProperty('ACCEPTING') !== 'true') {
     throw new Error('접수 준비 중입니다. 잠시 후 다시 확인해주세요.');
   }
-  if (Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd') > '2027-11-30') {
-    throw new Error('이번 보너스트랙 편지 접수가 마감되었습니다.');
-  }
 }
 
 function sheet_() {
