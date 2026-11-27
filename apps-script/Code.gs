@@ -2,7 +2,7 @@
  * Bonus Track server. Deploy as owner after configuring the linked private sheet.
  * Public functions validate all input. Functions ending "_" are editor-only helpers.
  */
-const POLICY_VERSION = '2026-11-27-direct-v1';
+const POLICY_VERSION = '2026-11-27-self-v1';
 const HEADERS = [
   '접수일', '보내는 사람', '작성자 이메일', '받는 사람', '받을 이메일',
   '편지', '발송 예정일', '발송 상태', '실제 발송일',
@@ -110,11 +110,11 @@ function submitLetter(payload) {
   const email = email_(payload.email);
   const sender = text_(payload.sender, 50, '보내는 사람');
   const letter = text_(payload.letter, 5000, '편지');
-  const other = payload.audience === 'other';
-  if (!other && payload.audience !== 'self') throw new Error('받는 대상을 선택해주세요.');
-  if (other && payload.sharing !== true) throw new Error('받는 분에게 전달되는 정보에 동의해주세요.');
-  const recipient = other ? text_(payload.recipient, 50, '받는 사람') : sender;
-  const recipientEmail = other ? email_(payload.recipientEmail) : email;
+  if (payload.audience !== 'self') {
+    throw new Error('미래의 나에게 쓰는 편지만 접수할 수 있습니다. 화면을 새로 열어주세요.');
+  }
+  const recipient = sender;
+  const recipientEmail = email;
   return locked_(() => {
     const sheet = sheet_();
     const existing = findRow_(sheet, 10, id);
@@ -130,10 +130,10 @@ function submitLetter(payload) {
     const now = timestamp_();
     const metadata = {
       version: POLICY_VERSION,
-      sender: { privacy: true, delivery: true, sharing: other, at: now, emailVerified: false },
-      recipient: other ? null : { privacy: true, delivery: true, at: now, emailVerified: false },
+      sender: { privacy: true, delivery: true, sharing: false, at: now, emailVerified: false },
+      recipient: { privacy: true, delivery: true, at: now, emailVerified: false },
       recipientProvidedBy: 'sender',
-      recipientConsentCollected: !other
+      recipientConsentCollected: true
     };
     const values = [
       now, sender, email, recipient, recipientEmail,
