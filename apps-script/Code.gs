@@ -21,7 +21,7 @@ function setupProject() {
   const sheet = spreadsheet.getSheetByName('편지접수');
   if (!sheet) throw new Error('편지접수 시트를 찾을 수 없습니다.');
   const existing = sheet.getRange(1, 1, 1, 9).getDisplayValues()[0];
-  if (existing.some((value, index) => value.replace(/\s/g, '') !== HEADERS[index].replace(/\s/g, ''))) {
+  if (existing.some((value, index) => value.replace(/\s/g, '').replace('받을사람', '받는사람') !== HEADERS[index].replace(/\s/g, ''))) {
     throw new Error('첫 9개 항목을 확인해주세요. 기존 내용을 덮어쓰지 않았습니다.');
   }
   sheet.getRange(1, 10, 1, 4).setValues([HEADERS.slice(9)]);
